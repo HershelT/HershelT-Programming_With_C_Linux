@@ -1,0 +1,86 @@
+General guidelines: read carefully before proceeding!! 
+
+Do all your work in the directory ~/exercises/ex1/ that you 
+create for this assignment. 
+
+Problem 1 specifies a list of ten file manipulation tasks 
+for you to implement. 
+
+Each task should be implemented using a single Linux command. 
+
+Use only relative paths; do not use absolute paths. 
+Usage of absolute paths will cause the testing scripts to fail.
+The only exception to this rule is when you access the shared 
+data directory /share/ex_data/ex1/ in task #2.
+
+In Problem 2 you are required to type these commands into 
+a solution file (my_commands.txt), which is the file that you submit. 
+
+
+You should test your solution by following the 
+four validation steps listed on page 3.
+Your script should pass the final validation step (running test_ex1) 
+to guarantee correct submission. 
+
+
+
+List of Commands
+Problem 1:
+a. Create a subdirectory called cs3144 inside the current directory.
+Solution: mkdir cs3144
+
+b. Copy the directory /share/ex_data/ex1/stuff into the newly created 
+cs3144 directory. After this operation, the directory cs3144 should 
+contain stuff as its subdirectory, including the 9 files in that directory.
+Solution: cp -r /share/ex_data/ex1/stuff cs3144 
+
+c. Move the file lecture1_notes.txt from the subdirectory stuff 
+(inside the newly created cs3144) to directory cs3144.
+Solution: mv cs3144/stuff/lecture1_notes.txt cs3144 
+
+d. Move into the subdirectory stuff (inside the newly created cs3144). 
+Solution: cd cs3144/stuff
+
+e. Use an alphabetic permission specifier to add write permission to everyone for
+all files in the parent directory (cs3144) and its subdirectories. 
+This operation should not change the permissions of directory cs3144 itself, 
+just the permissions to files and directories contained in it. 
+Solution: chmod -R a+w ../*
+
+f. Delete all files in the current directory whose names begin 
+with file2 or file4. 
+Do this using the appropriate wildcards. Note that there are exactly
+three files that satisfy this condition, but your command should 
+not use this information. 
+Solution: rm file2* file4*
+
+g. Use an octal permission mode to change permissions to file file01 such that: 
+- You (the owner) have read, write, and execute permissions.
+- Users in your group (students) have read and execute permissions.
+- Other users have no permissions.
+Solution: chmod 750 file01
+
+h. Use a single echo command with the appropriate output redirection operator 
+to create a new file named my.newfile in the parent directory (cs3144) 
+that contains a single line of text: 
+"this is my line of text and I am proud of it"
+Solution: echo "this is my line of text and I am proud of it" > ../my.newfile
+
+i.  Move up to the directory you started in (the parent directory of cs3144). 
+Solution: cd ../../
+
+j. Change the name of file fill2 in the stuff subdirectory to file2.new. 
+Solution: mv cs3144/stuff/fill2 cs3144/stuff/file2.new
+
+All of the above commands should be typed into a file called my_commands.txt.
+Commands:
+mkdir cs3144
+cp -r /share/ex_data/ex1/stuff cs3144
+mv cs3144/stuff/lecture1_notes.txt cs3144
+cd cs3144/stuff
+chmod -R a+w ../*
+rm file2{2,4}*
+chmod 750 file01
+echo "this is my line of text and I am proud of it" > ../my.newfile
+cd ../../
+mv cs3144/stuff/fill2 cs3144/stuff/file2.new

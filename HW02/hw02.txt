@@ -1,0 +1,118 @@
+General Notes:
+Piped Sequences
+We should only use the commands we saw in weeks 1-2:
+cp, cat, head, tail, cut, paste, wc, sort, uniq, tr
+DO NOT USE THE FOLLOWING COMMANDS (grep and sed) in your solutions.
+Make sure to use relative paths.
+The only exception to relative paths if when i am copying \share\ex_data\ex2\ when copying from shared directory
+
+
+PROBLEM 1.
+This question involves parsing a file named planets.txt with information about the planets in the solar system. Every line in file planets.txt has the following format:  
+<planet><comma><space><year>[<space><status>]
+- <planet> consists of an uppercase letter followed by any number of lowercase letters (e.g., Mars). 
+- <year> is either a four-digit number representing the year of discovery or -1 to indicate year of discovery unknown (or not applicable).
+- <status> is an optional field and is not specified for every planet. When it is specified, it contains text describing the planet. This text may contain white spaces, but you may assume it does not contain any punctuation marks. 
+<space> and <comma> represent the characters ' ' and ','.
+Write a piped sequence of commands for each of the tasks specified in 1-5 below. Specify each piped sequence in a separate line in a solution file named ex2.1.sh. The file should contain exactly five lines, each containing a single command or a single piped sequence of commands. 
+
+1. Copy the file planets.txt from directory /share/ex_data/ex2/ to the current directory.
+Answer: cp /share/ex_data/ex2/planets.txt .
+
+2. Write a single command that takes the file planets.txt and generates a file named planets2.txt that contains the same lines except sorted according to year of discovery (increasing order). Planets with the same year of discovery should be sorted in reverse alphabetical order.
+Answer: sort -t, -k2,2n -k1,1r planets.txt > planets2.txt
+
+3. Write a piped sequence of commands that takes the file planets.txt and generates a file named planets3.txt that contains the name and year of discovery of the planets in lines 4-7 in file planets.txt in the following format: <PLANET><colon><year> Where <PLANET> is the planet's name in upper-case letters, <colon> is the colon character (':'), and <year> is the year of discovery as in the original file. The optional status should not be printed into planets3.txt. 
+Validation: File planets3.txt should contain exactly four lines, and the first two lines should be: MERCURY:-1 NEPTUNE:1846 
+Answer: head -n7 planets.txt | tail -n4 | cut -d, -f1,2 | tr , : | tr a-z A-Z > planets3.txt
+
+4. Write a piped sequence of commands that takes the file planets.txt and appends to file planets2.txt (generated in Problem 1.2 above) the number of planets for which the discovery year is unknown (-1).
+Validation: The piped sequence of commands should add a single line with the numbdo it without grep, sed, and awker 2 to file planets2.txt.
+Do not use grep or sed in your solution.
+Answer: cat planets.txt | tr ',' '\n' | tr -s ' ' | cut -d' ' -f2 | tr -d -c '[:digit:]' | wc -l >> planets2.txt
+cut -d' ' -f1,3 planets.txt | tr -d -c '[:digit:]' | wc -l >> planets2.txt
+
+5. Write a piped sequence of commands that takes the file planets.txt and generates a file planets5.txt. 
+that specifies the optional status of each planet in the following format: 
+<pl>[<space><STATUS>] 
+Where <pl> are the first two letters in the planet's name in lower case, 
+<space> is the space character (' '),
+ and <status> is optional status as in the original file.
+The year of discovery should not appear in planets5.txt. 
+Validation: File planets5.txt should contain the same number of lines as planets.txt,  
+and the first two lines should be: 
+ea our planet
+ma 
+Hint: To implement this, you may wish to pipe in the output of 
+a piped sequence of commands as one of the two input arguments for command paste. 
+We show you how to do this in Recitation.
+Get rid of white spaces at the end of the line as well
+Answer: cut -d' ' -f1 planets.txt | tr -d -c '[:alpha:]' | tr A-Z a-z | cut -c1-2 | paste -d' ' - planets.txt > planets5.txt
+
+
+All the commands in five lines:
+cp /share/ex_data/ex2/planets.txt .
+sort -t' ' -k2,2n -k1,1r planets.txt > planets2.txt
+head -n7 planets.txt | tail -n4 | cut -d' ' -f1,2 |  tr ',' ':' | tr -d ' ' | tr a-z A-Z > planets3.txt
+cat planets.txt | tr ',' '\n' | tr -s ' ' | cut -d' ' -f2 | tr -d -c '[:digit:]-\n' | tr -d '[:digit:]' | tr -d '\n' | wc -m >> planets2.txt
+after creating file ex2.1.sh, run the following command to execute it:
+source ex2.1.sh
+
+
+
+PROBLEM 2.
+This question involves parsing a story file called story.txt, 
+containing the text of the novel Animal Farm by George Orwell 
+taken from the Gutenberg project (https://gutenberg.net.au/ebooks01/0100011h.html). 
+The file contains free text in no specific format. 
+Write a piped sequence of commands for each of the tasks specified in 1-5 below. 
+Specify each piped sequence in a separate line in a solution file named ex2.2.sh. 
+The file should contain exactly five lines, each containing a single command or a single piped sequence of commands. 
+You should only use commands we saw in weeks 1-2: 
+cp  cat  head  tail  cut  paste  wc  sort  uniq  tr 
+
+1. Copy the file story.txt from the shared directory /share/ex_data/ex2/ to the current directory.
+Answer: cp /share/ex_data/ex2/story.txt .
+
+2. Write a piped sequence of commands that takes lines 218-237 of story.txt 
+and switches between vowel letters according to the following permutation: A→ E→I→O→U→A. 
+For example, the letter "E" should be replaced by "I.” 
+The transformation should be done in lower-case letters just like in upper-case ones, such that, 
+for example, the letter "u" should be replaced by "a." 
+The transformed text should be printed in file story-switched-vowels.txt 
+Answer: head -n237 story.txt | tail -n20 | tr aeiou eioua | tr AEIOU EIOUA > story-switched-vowels.txt
+
+3. Write a piped sequence of commands that takes story.txt and prints to the screen the number of times that a 
+single or double quote character (''' or  '"') appears in the story.
+Answer: cat story.txt | tr -d -c "'\"" | wc -m
+
+4. Write a piped sequence of commands that takes story.txt and prints to a 
+file named letter-stats.txt the four non-space characters that appear
+most as the 3rd character in a line. For each such character, the file
+letterstats.txt should contain a line in the following format: 
+<dash><count><dash><char>
+Where <char> is the character, <count> is the number of times that this 
+character appears as the 3rd character in a line of story.txt, 
+and <dash> is the dash character ('-'). 
+The four characters should be sorted according to their counts 
+(from most frequent to less), and characters with the same count should be sorted alphabetically. 
+Answer: cut -story.txt | tr -d ' ' | sort | uniq -c | sort -k1,1nr -k2,2 | head -n5 | tail -n4 | tr -s ' ' | tr ' ' '-' > letter-stats.txt
+
+
+5. Write a piped sequence of commands that prints a list of all distinct words 
+that appear in story.txt into the file story-words.txt. For this purpose, 
+a word is defined as a non-empty contiguous sequence of characters that does not contain any white spaces or punctuation marks 
+and before it and after it there is a white space or punctuation mark (use the appropriate [::] tags here). 
+Furthermore, your consideration of words should be case-insensitive, meaning that “Hello” and “hello” should count as the same word. 
+The words in file story-words.txt should be written in lower-case letters and listed in alphabetical order
+chacrters that are not letters should be included.
+Use appropriaye [::] tags to define the words.
+Answer: tr -cs '[:alnum:]' '\n' < story.txt | tr A-Z a-z | sort | uniq > story-words.txt
+
+
+All the commands in five lines:
+cp /share/ex_data/ex2/story.txt .
+head -n237 story.txt | tail -n20 | tr aeiou eioua | tr AEIOU EIOUA > story-switched-vowels.txt
+cat story.txt | tr -d -c "'\"" | wc -m
+cut -c3 story.txt | tr -s ' '| tr -d ' ' |  sort | uniq -c | sort -k1,1nr -k2,2 |  head -n5 | tail -n4 | tr -s ' ' | tr ' ' '-' > letter-stats.txt
+tr -cs '[:alnum:]' '\n' < story.txt | tr A-Z a-z | sort | uniq > story-words.txt

@@ -1,0 +1,135 @@
+General notes:  A piped sequence of commands is an ordered sequence of Linux commands, 
+each connected to its preceding command using the pipe symbol ('|'). 
+Do not use any other way to combine commands (e.g., process substitution). 
+• You should only use commands we saw in class. For command grep, you may use the following options (if needed): -E -v -c. 
+For command sed, use the -r option. Do not use any other option for these two commands! 
+• As always, make sure to use relative paths and not absolute paths. 
+Your solution scripts should be executable from any location in the file system. 
+The only exception to this rule is to use /share/ex_data/ex3/ which is an absolute path. 
+
+
+Problem 1:  
+    This problem involves additional parsing tasks for files planets.txt and 
+story.txt, which you parsed in the previous HW assignment. Recall that 
+planets.txt holds information about the nine planets in our solar system. Every line in file planets.txt has the following format:  
+    <planet><comma><space><year>[<space><status>] 
+• <planet> consists of an uppercase letter followed by any number of lowercase letters (e.g., Mars). 
+ • <year> is either a four-digit number representing the year of discovery or -1 to indicate year of discovery unknown (or not applicable). 
+ • <status> is an optional field and is not specified for every planet. When it is specified, it contains text describing the planet. This text may contain white spaces, but you may assume it does not contain any punctuation marks. 
+ • <space> and <comma> represent the characters ' ' and ','. 
+ Further, recall that story.txt contains the text of the novel Animal Farm by George Orwell and follows no particular format. 
+ Using these files, write commands for each of the tasks specified in 1-6 below. 
+ Specify each piped sequence in a separate line in a solution file named ex3.1.sh. 
+ The file should contain exactly six lines, 
+ each containing a single command or a single piped sequence of commands. 
+
+
+1. Copy the files planets.txt and story.txt from directory /share/ex_data/ex3/ to the current directory.
+Answer: cp /share/ex_data/ex3/planets.txt . | cp /share/ex_data/ex3/story.txt .
+
+2. Write a single comman that takes the file planets.txt and prints each line reformatted as follows into file planet-discovery,txt:
+ In year <year>, planet <planet> was discovered 
+Fields <year> and <planet> should be printed as they are in planets.txt, and the optional status should be omitted. 
+Answer: sed -r 's/([A-Z][a-z]+), ([0-9]{4}|-1)( .*)?/In year \2, planet \1 was discovered/' planets.txt > planet-discovery.txt
+
+
+3. Write a single command that takes the file planets.txt and prints to file planet-status.txt all lines in planets.txt that correspond to planets whose name contains exactly five letters and whose status is non-empty.
+Answer: grep -E '^[A-Z][a-z]{4}, (-?[0-9]+|-1) .{1,}' planets.txt > planet-status.txt
+
+
+4. Write a piped sequence of commands that takes the file planets.txt and prints to file planets-before-1900.txt the names of all planets which were discovered between the years 1000 and 1899. The output file should only contain planet names, and the names should be sorted alphabetically. Planets with unknown discovery dates (-1) should not be listed. Note that the optional status may contain numbers, and in particular years.
+Answer: grep -E '^[A-Z][a-z]+, (1[0-8][0-9]{2})' planets.txt | sed -r 's/([A-Z][a-z]+), (-?[0-9]+) .*/\1/' | sort | sed 's/,.*//' > planets-before-1900.txt
+
+
+5. Write a piped sequence of commands that assigns a bash variable named num_lines with the number of lines of story.txt that satisfy the following criteria: 
+• The line contains a word with a vowel (a, e, i, o, or u) followed by either cc or by ss (all in lower-case) and right after the word there is a punctuation character. 
+• The line contains at most 200 letters (a-z or A-Z).
+Answer:num_lines=$(grep -E '.*[aeiou](cc|ss).*[.,?!]' story.txt | tr -cd '[:alpha:]' | awk 'length <= 200' | wc -l)
+
+
+6. Snowball is one of the main characters in Animal farm.
+ As a result, the story mentions the word “Snowball's” many times with different words following it. 
+ For example, “Snowball's plans”, and “Snowball's tail”. 
+Write a piped sequence of commands that prints to file snowballs_words.txt all distinct words mentioned after the word “Snowball's”. 
+• A word is said to follow “Snowball's” if it is a string of lower-case letters that follows the word "Snowball's" and a non-empty sequence of white spaces. 
+Note that one of these white spaces can be a newline. \
+This word should be followed by a white space or a punctuation mark.
+• A line in story.txt may contain several instances of the word "Snowball's". 
+• The words in snowballs_words.txt should be sorted alphabetically and without repetitions. 
+Note: If you use sed to search for the word “Snowball's”, then you should wrap the sed command with double quotes (" ") and not with single quotes (' '),\
+ as we typically do, so that the quote character in “Snowball's” is not mistaken to be the closing quote for the command.
+Cannot use grep -o and use " " instead of ' ' for sed, make it only find one word after snowball's. Find one word after Snowball's and put that word in the file not the whole line
+Answer: sed -r "s/Snowball's ([a-z]+)[[:space:][:punct:]]*/\1/g" story.txt | sort | uniq > snowballs_words.txt
+
+All combined:
+cp /share/ex_data/ex3/planets.txt /share/ex_data/ex3/story.txt .
+sed -r 's/([A-Z][a-z]+), (-?[0-9]+)( .*)?/In year \2, planet \1 was discovered/' planets.txt > planet-discovery.txt
+grep -E '^[A-Z][a-z]{4}, (-?[0-9]+) .{1,}' planets.txt > planet-status.txt
+grep -E '^[A-Z][a-z]+, (1[0-8][0-9]{2})' planets.txt | sed -r 's/([A-Z][a-z]+), (-?[0-9]+) .*/\1/' | sort | sed 's/,.*//' > planets-before-1900.txt
+num_lines=$(grep -E '[aeiou](cc|ss)[[:alpha:]]*[[:punct:]]' story.txt |sed 's/[^a-zA-Z]//g' | grep -E '^.{1,200}$' | wc -l)
+
+
+
+
+
+
+
+Problem 2.
+In this problem, we ask you to write two bash scripts: in Problem 2.1, you will write one for computing the storage size of a single item (file or directory) and in Problem 2.2 you will write one for computing the storage size of a given directory subtree. The second script uses the first one. 
+1. Write a bash script called get-storage.sh which accesses a bash variable named my_item that holds a path to a file or directory and prints the number of bytes that are used by this item for storage (as specified by ls -l). Follow these guidelines:
+• The script get-storage.sh should consist of exactly one line containing a piped sequence of commands that starts with ls -ld $my_item 
+• Assume that the bash environment in which the script get-storage.sh is executed contains a variable named my_item, which holds a valid path to an item (file or directory) in the file system. 
+Use same restraints as in the general notes and previous problems.
+Like no awk 
+Answer: ls -ld $my_item | tr -s ' ' | cut -d ' ' -f 5
+
+
+2. Write a bash script named subtree-storage.sh that receives a path as an argument in the command line. The script should print the total number of bytes that are used for storage by the (directory) tree rooted in this path. Follow these guidelines (and see execution examples on the next page): 
+• If the script does not receive exactly one input argument (either no arguments or more than one), then it should print the following error message and exit with status 1: 
+Usage: <SCRIPT_PATH> PATH 
+Where <SCRIPT_PATH> is the name (and path) of the script, as called by the user.  
+
+• If the script receives exactly one input argument, but this argument is not a valid path (to a file or directory), then it should print the following error message and exit with status 2: 
+<ARG> is not a valid path 
+Where <ARG> is the argument given to subtree-storage.sh.  
+
+• If the input argument of the script is a valid file path, the script should print the size of that file in bytes (as script get-storage.sh) and exit with status 0. 
+• If the input argument of the script is a valid directory path (not file), then the script should print its size plus the sizes of all items (files and directories) contained within that directory’s subtree in the filesystem and exit with status 0.  
+
+Implementation notes: 
+• The script should be implemented as a stand-alone executable script. Make sure to have an accurate “#!” comment at the top of the file and grant the script executable permissions to enable this. 
+• Use the appropriate if statements to check that the first input argument contains a valid file path or a valid directory path. 
+• Use the appropriate call to script get-storage.sh from Problem 2.1 to get the size of items. You may assume that this script exists in the current directory. 
+• Use an appropriate recursive call to script subtree-storage.sh. The halting condition of the recursion should be when the input argument corresponds to a file path. 
+• Use simple arithmetic operations for bash variables to sum sizes. 
+<Make sure to fllow: Use an appropriate recursive call to script subtree-storage.sh. The halting condition of the recursion should be when the input argument corresponds to a file path. 
+Answer:
+#!/bin/bash
+#checks for one argument
+if [ "$#" != 1 ]; then
+    echo "Usage: $0 PATH"
+    exit 1
+fi
+# checking if path is valid
+if [ ! -e "$1" ]; then
+    echo "$1 is not a valid path"
+    exit 2
+fi
+
+# check if its a file
+if [ -f "$1" ]; then
+    my_item="$1"
+    echo `source get-storage.sh`
+    exit 0
+fi
+
+# check if its a directory and sum the sizes of all items in the directory
+if [ -d "$1" ]; then
+    my_item="$1"
+    total_size=0
+    for item in `ls -A $my_item`; do
+        total_size=$((total_size + $(subtree-storage.sh $my_item/$item)))
+    done
+    echo $total_size
+    exit 0
+fi
